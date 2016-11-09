@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docs on chihaya</title>
+    <link>https://chihaya.io/docs/index.xml</link>
+    <description>Recent content in Docs on chihaya</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Chihaya Authors. Released under the BSD 2-Clause License</copyright>
+    <lastBuildDate>Mon, 07 Nov 2016 12:31:10 +0100</lastBuildDate>
+    <atom:link href="https://chihaya.io/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Deniability Middleware</title>
+      <link>https://chihaya.io/docs/v2/middleware/deniability/</link>
+      <pubDate>Mon, 07 Nov 2016 12:31:10 +0100</pubDate>
+      
+      <guid>https://chihaya.io/docs/v2/middleware/deniability/</guid>
+      <description>
+
+&lt;p&gt;This package provides the PreHook &lt;code&gt;deniability&lt;/code&gt; which inserts ghost peers into announce responses and increases scrape counters to achieve plausible deniability.&lt;/p&gt;
+
+&lt;h2 id=&#34;functionality&#34;&gt;Functionality&lt;/h2&gt;
+
+&lt;h3 id=&#34;for-announces&#34;&gt;For Announces&lt;/h3&gt;
+
+&lt;p&gt;This middleware will choose random announces and modify the list of peers returned.
+A random number of randomly generated peers will be inserted at random positions into the list of peers.
+As soon as the length of the list of peers exceeds &lt;code&gt;numWant&lt;/code&gt;, peers will be replaced rather than inserted.&lt;/p&gt;
+
+&lt;p&gt;Also note that the IP address for the generated peeer consists of bytes in the range [1,254].
+Whether IPv4 or IPv6 addresses are generated depends on the announcing Peer&amp;rsquo;s IP.&lt;/p&gt;
+
+&lt;p&gt;Note that if a response is picked for augmentation, at least one Peer will be inserted.
+There is one exception to this rule:
+Otherwise empty reponse will not be augmented to make it more difficult to determine the prefixes used for generated Peers.&lt;/p&gt;
+
+&lt;h3 id=&#34;for-scrapes&#34;&gt;For Scrapes&lt;/h3&gt;
+
+&lt;p&gt;A scrape will randomly be chosen, based on the &lt;code&gt;modify_response_probability&lt;/code&gt;.
+If chosen, a number of seeders and leechers will be generated for every InfoHash of the scrape.&lt;/p&gt;
+
+&lt;p&gt;Note that there will be at least one peer added to every InfoHash, this can be either a seeder or a leecher.
+As with Announces, the only exception to this rule are otherwise empty scrapes.&lt;/p&gt;
+
+&lt;h2 id=&#34;configuration&#34;&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;This middleware provides the following parameters for configuration:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;modify_response_probability&lt;/code&gt; (float, &amp;gt;0, &amp;lt;= 1) indicates the probability by which a response will be augmented.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;max_random_peers&lt;/code&gt; (int, &amp;gt;0) sets an upper boundary (inclusive) for the amount of peers added.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;prefix&lt;/code&gt; (string, 20 characters at most) sets the prefix for generated peer IDs.&lt;br /&gt;
+The peer ID will be padded to 20 bytes using a random string of numeric characters.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;min_port&lt;/code&gt; (int, &amp;gt;0, &amp;lt;=65535) sets a lower boundary for the port for generated peers.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;max_port&lt;/code&gt; (int, &amp;gt;0, &amp;lt;=65536, &amp;gt; &lt;code&gt;min_port&lt;/code&gt;) sets an upper boundary for the port for generated peers.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parallelism&lt;/code&gt; (int, &amp;gt;=0) determines the amount of parallelism this hook can operate with.&lt;br /&gt;
+The resulting theoretical upper limit of parallelism is &lt;code&gt;2^parallelism)&lt;/code&gt;, assuming an even random distribution of infohashes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An example config might look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;chihaya:
+  prehooks:
+    - name: deniability
+      config:
+        modify_response_probability: 0.2
+        max_random_peers: 5
+        prefix: -AZ2060-
+        min_port: 40000
+        max_port: 60000
+        parallelism: 8
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more information about peer IDs and their prefixes, see &lt;a href=&#34;https://wiki.theory.org/BitTorrentSpecification#peer_id&#34;&gt;this wiki entry&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Announce Interval Variation Middleware</title>
+      <link>https://chihaya.io/docs/v2/middleware/varinterval/</link>
+      <pubDate>Sun, 06 Nov 2016 22:21:52 +0100</pubDate>
+      
+      <guid>https://chihaya.io/docs/v2/middleware/varinterval/</guid>
+      <description>
+
+&lt;p&gt;This package provides the announce middleware &lt;code&gt;interval variation&lt;/code&gt; which randomizes the announce interval.&lt;/p&gt;
+
+&lt;h2 id=&#34;functionality&#34;&gt;Functionality&lt;/h2&gt;
+
+&lt;p&gt;This middleware chooses random announces and modifies the &lt;code&gt;interval&lt;/code&gt; and &lt;code&gt;min_interval&lt;/code&gt; fields.
+A random number of seconds are added to the &lt;code&gt;interval&lt;/code&gt; field and, if desired, also to the &lt;code&gt;min_interval&lt;/code&gt; field.&lt;/p&gt;
+
+&lt;p&gt;Note that if a response is picked for modification and &lt;code&gt;min_interval&lt;/code&gt; should be changed as well, both &lt;code&gt;interval&lt;/code&gt; and &lt;code&gt;min_interval&lt;/code&gt; are modified by the same amount.&lt;/p&gt;
+
+&lt;h2 id=&#34;use-case&#34;&gt;Use Case&lt;/h2&gt;
+
+&lt;p&gt;Use this middleware to avoid recurring load spikes on the tracker.
+By randomizing the announce interval, load spikes will flatten out after a few announce cycles.&lt;/p&gt;
+
+&lt;h2 id=&#34;configuration&#34;&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;This middleware provides the following parameters for configuration:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;modify_response_probability&lt;/code&gt; (float, &amp;gt;0, &amp;lt;= 1) indicates the probability by which a response will be chosen to have its announce intervals modified.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;max_increase_delta&lt;/code&gt; (int, &amp;gt;0) sets an upper boundary (inclusive) for the amount of seconds added.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;modify_min_interval&lt;/code&gt; (boolean) whether to modify the &lt;code&gt;min_interval&lt;/code&gt; field as well.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An example config might look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;chihaya:
+  prehooks:
+    - name: interval variation
+      config:
+        modify_response_probability: 0.2
+        max_increase_delta: 60
+        modify_min_interval: true 
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Chihaya v2 Documentation</title>
+      <link>https://chihaya.io/docs/v2/</link>
+      <pubDate>Sun, 06 Nov 2016 22:13:20 +0100</pubDate>
+      
+      <guid>https://chihaya.io/docs/v2/</guid>
+      <description>
+
+&lt;p&gt;TODO add information about architecture etc.&lt;/p&gt;
+
+&lt;h2 id=&#34;middleware&#34;&gt;Middleware&lt;/h2&gt;
+
+&lt;p&gt;Several hooks are already included in the Chihaya repository.&lt;/p&gt;
+
+&lt;h3 id=&#34;interval-variation&#34;&gt;Interval Variation&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;interval variation&lt;/code&gt; PreHook adds variation to the announce interval.
+Find more info in &lt;a href=&#34;https://chihaya.io/docs/v2/middleware/varinterval/&#34;&gt;the documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;plausible-deniability&#34;&gt;Plausible Deniability&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;deniability&lt;/code&gt; PreHook adds ghost peers into announce responses and randomly increases scrape counters to achieve plausible deniability.
+Find more info in &lt;a href=&#34;https://chihaya.io/docs/v2/middleware/deniability/&#34;&gt;the documentation&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
